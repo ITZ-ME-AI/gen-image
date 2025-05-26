@@ -422,6 +422,22 @@ app.get('/api/auth/status', authenticateToken, async (req, res) => {
     }
 });
 
+// Add pinging mechanism to keep server alive
+const pingServer = async () => {
+    try {
+        const response = await fetch('https://gen-image-f3a3.onrender.com');
+        console.log('Server pinged successfully:', response.status);
+    } catch (error) {
+        console.error('Error pinging server:', error);
+    }
+};
+
+// Set up interval to ping every 40 seconds
+setInterval(pingServer, 40000);
+
+// Initial ping
+pingServer();
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

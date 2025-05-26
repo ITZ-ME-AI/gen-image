@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Generator</title>
+    <title>IMAGE-GEN | AI Image Generator</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -215,11 +215,11 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-magic"></i>
-                AI Image Generator
+                IMAGE-GEN
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -259,25 +259,35 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container mt-4">
+    <div class="container main-container">
         <!-- Home Section -->
-        <section id="homeSection">
+        <section id="homeSection" class="section active">
             <div class="hero-section text-center">
                 <h1>Create Amazing Images with AI</h1>
-                <p>Transform your ideas into stunning visuals using the power of artificial intelligence</p>
+                <p class="subtitle">Transform your ideas into stunning visuals using the power of artificial intelligence</p>
             </div>
+            
             <div class="main-card">
                 <div class="input-area">
-                    <input type="text" id="promptInput" class="form-control" placeholder="Describe the image you want to generate...">
-                    <button id="generateBtn" class="btn btn-primary">
-                        <i class="fas fa-magic"></i> Generate
-                    </button>
+                    <div class="input-wrapper">
+                        <input type="text" id="promptInput" class="form-control" placeholder="Describe the image you want to generate...">
+                        <button id="generateBtn" class="btn btn-primary">
+                            <i class="fas fa-magic"></i> Generate
+                        </button>
+                    </div>
                 </div>
+
                 <div id="loadingIndicator" class="loading" style="display: none;">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Creating your masterpiece...
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="loading-text">Creating your masterpiece...</span>
                 </div>
-                <img id="generatedImage" style="display: none;" alt="Generated image">
+
+                <div class="result-container">
+                    <img id="generatedImage" style="display: none;" alt="Generated image">
+                </div>
+
                 <div class="suggestion-chips">
                     <div class="chip" data-prompt="A beautiful landscape with mountains and a lake">
                         <i class="fas fa-mountain"></i>
@@ -300,17 +310,23 @@
         </section>
 
         <!-- Community Section -->
-        <section id="communitySection" style="display: none;">
-            <h2 class="text-center mb-4">Community Gallery</h2>
-            <div class="row" id="galleryContainer">
+        <section id="communitySection" class="section">
+            <div class="section-header">
+                <h2>Community Gallery</h2>
+                <p>Explore amazing creations from our community</p>
+            </div>
+            <div class="row g-4" id="galleryContainer">
                 <!-- Community images will be loaded here -->
             </div>
         </section>
 
         <!-- History Section -->
-        <section id="historySection" style="display: none;">
-            <h2 class="text-center mb-4">Your Generations</h2>
-            <div class="row" id="historyContainer">
+        <section id="historySection" class="section">
+            <div class="section-header">
+                <h2>Your Generations</h2>
+                <p>View your previously generated images</p>
+            </div>
+            <div class="row g-4" id="historyContainer">
                 <!-- User's generated images will be loaded here -->
             </div>
         </section>
@@ -318,7 +334,7 @@
 
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -346,7 +362,7 @@
 
     <!-- Register Modal -->
     <div class="modal fade" id="registerModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">

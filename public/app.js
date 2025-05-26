@@ -66,12 +66,18 @@ function updateAuthUI(isAuthenticated) {
 
 // Navigation
 function showSection(sectionId) {
-    [homeSection, communitySection, historySection].forEach(section => {
-        section.style.display = 'none';
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
     });
     
-    document.getElementById(sectionId).style.display = 'block';
+    // Show selected section
+    const selectedSection = document.getElementById(sectionId);
+    if (selectedSection) {
+        selectedSection.classList.add('active');
+    }
     
+    // Update navigation links
     navLinks.forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('href') === `#${sectionId}`) {
@@ -79,6 +85,7 @@ function showSection(sectionId) {
         }
     });
 
+    // Load section-specific content
     if (sectionId === 'communitySection') {
         loadCommunityImages();
     } else if (sectionId === 'historySection' && currentUser) {
@@ -133,40 +140,43 @@ async function generateImage(prompt) {
                         const data = JSON.parse(line.slice(6));
                         
                         if (data.type === 'estimation') {
-                            loadingIndicator.innerHTML = `In queue: ${data.queueSize} people ahead, ETA: ${data.eta.toFixed(1)} seconds`;
+                            loadingIndicator.querySelector('.loading-text').textContent = 
+                                `In queue: ${data.queueSize} people ahead, ETA: ${data.eta.toFixed(1)} seconds`;
                         } else if (data.type === 'processing') {
-                            loadingIndicator.innerHTML = 'Processing image...';
+                            loadingIndicator.querySelector('.loading-text').textContent = 'Processing image...';
                         } else if (data.type === 'success' && data.originalUrl) {
-                            // Received original URL from backend, now upload to File2Link
-                            loadingIndicator.innerHTML = 'Uploading image...';
+                            // Show original URL immediately for preview
+                            generatedImage.src = data.originalUrl;
+                            generatedImage.style.display = 'block';
+                            loadingIndicator.querySelector('.loading-text').textContent = 'Uploading image...';
+                            
+                            // Upload to File2Link in the background
                             const uploadedUrl = await uploadImageToFile2Link(data.originalUrl);
                             
                             // Add image to community gallery via new backend endpoint
                             if (uploadedUrl) {
                                 await addCommunityImage(data.originalUrl, uploadedUrl, prompt);
+                                // Update with processed URL
                                 generatedImage.src = uploadedUrl;
-                                generatedImage.style.display = 'block';
                                 loadCommunityImages();
                                 loadUserHistory();
                             } else {
-                                 throw new Error('Image upload to File2Link failed.');
+                                throw new Error('Image upload to File2Link failed.');
                             }
                             return;
                         } else if (data.type === 'error') {
-                             throw new Error(data.message || 'Image generation failed');
+                            throw new Error(data.message || 'Image generation failed');
                         }
                     } catch (error) {
                         console.error('Error processing SSE data:', error);
-                         alert(error.message || 'An error occurred during generation.');
-                         // Stop reading the stream on error
-                         reader.cancel();
-                         return;
+                        alert(error.message || 'An error occurred during generation.');
+                        reader.cancel();
+                        return;
                     }
                 }
             }
         }
 
-        // If the stream closes without a success or error message
         throw new Error('Generation process completed without a valid response.');
 
     } catch (error) {
@@ -176,22 +186,19 @@ async function generateImage(prompt) {
         isGenerating = false;
         generateBtn.disabled = false;
         loadingIndicator.style.display = 'none';
-        loadingIndicator.innerHTML = 'Creating your masterpiece...';
+        loadingIndicator.querySelector('.loading-text').textContent = 'Creating your masterpiece...';
     }
 }
 
 // Upload image to File2Link
 async function uploadImageToFile2Link(imageUrl) {
     try {
-        // Fetch the image data
         const response = await fetch(imageUrl);
         const blob = await response.blob();
 
-        // Create form data
         const formData = new FormData();
-        formData.append('file', blob, 'generated_image.jpg'); // Use a generic filename
+        formData.append('file', blob, 'generated_image.jpg');
 
-        // Upload to File2Link API
         const uploadResponse = await fetch('https://file2link-ol4p.onrender.com/upload', {
             method: 'POST',
             body: formData
@@ -207,41 +214,37 @@ async function uploadImageToFile2Link(imageUrl) {
 
     } catch (error) {
         console.error('File2Link upload error:', error);
-        // Do NOT show an alert here, handle error in generateImage's catch block
         return null;
     }
 }
 
-// Add image to community gallery via backend endpoint
+// Add image to community gallery
 async function addCommunityImage(originalUrl, uploadedUrl, prompt) {
-     try {
-         const token = localStorage.getItem('token');
-         if (!token) {
-             // This case should ideally not happen if generateImage checks auth first
-             console.error('Attempted to add community image without authentication.');
-             return;
-         }
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('Attempted to add community image without authentication.');
+            return;
+        }
 
-         const response = await fetch('/api/add-community-image', {
-             method: 'POST',
-             headers: {
-                 'Content-Type': 'application/json',
-                 'Authorization': `Bearer ${token}`
-             },
-             body: JSON.stringify({ originalUrl, uploadedUrl, prompt })
-         });
+        const response = await fetch('/api/add-community-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ originalUrl, uploadedUrl, prompt })
+        });
 
-         if (!response.ok) {
-             const errorData = await response.json();
-             throw new Error(errorData.error || 'Failed to add image to community');
-         }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add image to community');
+        }
 
-         // Success, nothing more to do here, loadCommunityImages and loadUserHistory are called in generateImage
-
-     } catch (error) {
-         console.error('Add community image error:', error);
-         alert(`Failed to add image to community: ${error.message}`);
-     }
+    } catch (error) {
+        console.error('Add community image error:', error);
+        alert(`Failed to add image to community: ${error.message}`);
+    }
 }
 
 // Load Community Images
@@ -252,7 +255,7 @@ async function loadCommunityImages() {
         
         const galleryContainer = document.getElementById('galleryContainer');
         if (galleryContainer) {
-             galleryContainer.innerHTML = '';
+            galleryContainer.innerHTML = '';
             
             images.forEach(image => {
                 const card = createImageCard(image);
@@ -267,14 +270,20 @@ async function loadCommunityImages() {
 // Create Image Card
 function createImageCard(image) {
     const card = document.createElement('div');
-    card.className = 'col-md-4'; // Use Bootstrap grid class
+    card.className = 'col-md-4 mb-4';
     card.innerHTML = `
         <div class="community-image-card">
             <img src="${image.uploaded_url || image.image_url}" alt="${image.prompt}" class="card-img-top">
             <div class="card-body">
                 <p class="prompt">${image.prompt}</p>
-                <p class="username">By ${image.username}</p>
-                <p class="timestamp">${new Date(image.created_at).toLocaleDateString()}</p>
+                <p class="username">
+                    <i class="fas fa-user"></i>
+                    ${image.username}
+                </p>
+                <p class="timestamp">
+                    <i class="fas fa-clock"></i>
+                    ${new Date(image.created_at).toLocaleDateString()}
+                </p>
                 ${currentUser && currentUser.id === image.user_id ? `
                     <button class="btn btn-danger btn-sm mt-2" onclick="deleteImage(${image.id})">
                         <i class="fas fa-trash"></i> Delete
@@ -305,14 +314,14 @@ async function loadUserHistory() {
         const images = await response.json();
         
         const historyContainer = document.getElementById('historyContainer');
-         if (historyContainer) {
+        if (historyContainer) {
             historyContainer.innerHTML = '';
             
             images.forEach(image => {
                 const card = createImageCard(image);
                 historyContainer.appendChild(card);
             });
-         }
+        }
     } catch (error) {
         console.error('Failed to load user history:', error);
     }
@@ -325,8 +334,8 @@ async function deleteImage(imageId) {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-             alert('You must be logged in to delete images.');
-             return;
+            alert('You must be logged in to delete images.');
+            return;
         }
 
         const response = await fetch(`/api/user-generations/${imageId}`, {
@@ -337,7 +346,6 @@ async function deleteImage(imageId) {
         });
         
         if (response.ok) {
-            // Refresh both galleries after deletion
             loadCommunityImages();
             loadUserHistory();
         } else {
@@ -350,65 +358,9 @@ async function deleteImage(imageId) {
     }
 }
 
-// Reset Database (Admin Functionality)
-async function resetDatabase() {
-    if (!currentUser || currentUser.username !== 'admin') {
-        alert('You do not have permission to reset the database.');
-        return;
-    }
-
-    if (!confirm('Are you sure you want to reset the database? This will delete ALL users, images, and generations. This action cannot be undone.')) return;
-    
-    try {
-        const response = await fetch('/api/reset-db', {
-            method: 'POST',
-            headers: {
-                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        });
-        
-        if (response.ok) {
-            alert('Database reset successfully');
-            // Clear UI and reload initial state
-            loadCommunityImages();
-            if (currentUser) {
-                loadUserHistory(); // Will likely be empty
-            }
-        } else {
-             const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to reset database');
-        }
-    } catch (error) {
-        console.error('Reset error:', error);
-        alert('Failed to reset database: ' + error.message);
-    }
-}
-
-// Initial setup: Add reset button if admin
-function setupAdminPanel() {
-    if (currentUser && currentUser.username === 'admin') {
-        const existingPanel = document.querySelector('.admin-panel');
-        if (!existingPanel) {
-            const adminPanelHtml = `
-                <div class="admin-panel mt-4">
-                    <button class="btn btn-warning" onclick="resetDatabase()">
-                        <i class="fas fa-database"></i> Reset Database
-                    </button>
-                </div>
-            `;
-            // Append to the main container or a specific admin section if you have one
-            const mainContainer = document.querySelector('.container');
-            if (mainContainer) {
-                 mainContainer.insertAdjacentHTML('beforeend', adminPanelHtml);
-            }
-        }
-    }
-}
-
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth().then(() => {
-        setupAdminPanel();
         showSection('homeSection');
     });
 });
@@ -439,40 +391,35 @@ if (promptInput) {
             if (prompt) {
                 generateImage(prompt);
             } else {
-                 alert('Please enter a prompt.');
+                alert('Please enter a prompt.');
             }
         }
     });
 }
 
-// Suggestion chip event listeners (ensure chips exist)
-if (suggestionChips && suggestionChips.length > 0) {
-    suggestionChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            const prompt = chip.getAttribute('data-prompt');
-            if (promptInput) {
-                promptInput.value = prompt;
-                 // Optionally trigger generation on chip click
-                 // generateImage(prompt);
-            }
-        });
+suggestionChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+        const prompt = chip.getAttribute('data-prompt');
+        if (promptInput) {
+            promptInput.value = prompt;
+            promptInput.focus();
+        }
     });
-}
+});
 
 if (loginBtn) {
     loginBtn.addEventListener('click', () => {
-        // Assuming Bootstrap modals are used
         const loginModalElement = document.getElementById('loginModal');
         if (loginModalElement) {
-             const loginModal = new bootstrap.Modal(loginModalElement);
-             loginModal.show();
+            const loginModal = new bootstrap.Modal(loginModalElement);
+            loginModal.show();
         }
     });
 }
 
 if (registerBtn) {
     registerBtn.addEventListener('click', () => {
-         const registerModalElement = document.getElementById('registerModal');
+        const registerModalElement = document.getElementById('registerModal');
         if (registerModalElement) {
             const registerModal = new bootstrap.Modal(registerModalElement);
             registerModal.show();
@@ -485,9 +432,7 @@ if (logoutBtn) {
         localStorage.removeItem('token');
         currentUser = null;
         updateAuthUI(false);
-        // Redirect or show a default section after logout
         showSection('homeSection');
-        // Clear history view after logout
         const historyContainer = document.getElementById('historyContainer');
         if(historyContainer) historyContainer.innerHTML = '';
     });
@@ -519,19 +464,18 @@ if (loginForm) {
                 localStorage.setItem('token', data.token);
                 currentUser = data.user;
                 updateAuthUI(true);
-                setupAdminPanel(); // Check for admin after login
-                // Hide modal
+                
                 const loginModalElement = document.getElementById('loginModal');
-                 if (loginModalElement) {
+                if (loginModalElement) {
                     const modal = bootstrap.Modal.getInstance(loginModalElement);
                     if (modal) modal.hide();
-                 }
-                 // Clear form
-                 if(emailInput) emailInput.value = '';
-                 if(passwordInput) passwordInput.value = '';
+                }
+                
+                if(emailInput) emailInput.value = '';
+                if(passwordInput) passwordInput.value = '';
 
             } else {
-                 const errorData = await response.json();
+                const errorData = await response.json();
                 throw new Error(errorData.error || 'Login failed');
             }
         } catch (error) {
@@ -568,20 +512,19 @@ if (registerForm) {
                 localStorage.setItem('token', data.token);
                 currentUser = data.user;
                 updateAuthUI(true);
-                 setupAdminPanel(); // Check for admin after registration
-                 // Hide modal
-                 const registerModalElement = document.getElementById('registerModal');
-                 if (registerModalElement) {
+                
+                const registerModalElement = document.getElementById('registerModal');
+                if (registerModalElement) {
                     const modal = bootstrap.Modal.getInstance(registerModalElement);
                     if (modal) modal.hide();
-                 }
-                 // Clear form
-                 if(usernameInput) usernameInput.value = '';
-                 if(emailInput) emailInput.value = '';
-                 if(passwordInput) passwordInput.value = '';
+                }
+                
+                if(usernameInput) usernameInput.value = '';
+                if(emailInput) emailInput.value = '';
+                if(passwordInput) passwordInput.value = '';
 
             } else {
-                 const errorData = await response.json();
+                const errorData = await response.json();
                 throw new Error(errorData.error || 'Registration failed');
             }
         } catch (error) {
