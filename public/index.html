@@ -4,359 +4,241 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IMAGE-GEN | AI Image Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
-    <style>
-        :root {
-            --background-start: #0d1a2d;
-            --background-mid: #1a2d45;
-            --background-end: #273b55;
-            --primary-gradient: linear-gradient(90deg, #7f5af0 0%, #a878f9 100%);
-            --text-primary: #e2e8f0;
-            --text-secondary: #a0aec0;
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --input-border: rgba(255, 255, 255, 0.15);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --hover-bg: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #4a0e4e, #0e4e4a, #4e4a0e, #0e2a4e);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            overflow-x: hidden;
-        }
-
-        .container {
-            text-align: center;
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .made-by {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        .made-by svg {
-             vertical-align: middle;
-             margin-right: 0.3rem;
-        }
-
-        .header h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #ffffff 0%, #a0aec0 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 1rem;
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-bottom: 2.5rem;
-        }
-
-        .input-area {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .input-area input[type="text"] {
-            flex-grow: 1;
-            padding: 1rem 1.5rem;
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            color: var(--text-primary);
-            transition: border-color 0.3s ease;
-        }
-
-        .input-area input[type="text"]:focus {
-            outline: none;
-            border-color: #7f5af0;
-        }
-
-        .input-area input[type="text"]::placeholder {
-             color: var(--text-secondary);
-        }
-
-        .input-area button {
-            padding: 1rem 2.5rem;
-            background: linear-gradient(90deg, #7f5af0 0%, #a878f9 100%);
-            color: white;
-            border: none;
-            border-radius: 2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            box-shadow: 0 0 15px rgba(127, 90, 240, 0.6);
-        }
-
-        .input-area button:hover {
-            opacity: 1;
-            box-shadow: 0 0 25px rgba(127, 90, 240, 0.8);
-        }
-
-        .input-area button:disabled {
-            background: #4a5568;
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: none;
-        }
-
-        .input-area button svg {
-            width: 20px;
-            height: 20px;
-            stroke: white;
-            fill: none;
-        }
-
-        .suggestion-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-        }
-
-        .chip {
-            background-color: var(--card-bg);
-            color: var(--text-secondary);
-            padding: 0.5rem 1rem;
-            border-radius: 1.5rem;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .chip:hover {
-            background-color: var(--hover-bg);
-        }
-
-        .chip svg {
-             width: 12px;
-             height: 12px;
-             vertical-align: middle;
-        }
-
-        .loading {
-            display: none;
-            margin-top: 1.5rem;
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        #result {
-            margin-top: 2rem;
-        }
-
-        #generatedImage {
-            max-width: 100%;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 2.5rem;
-            }
-
-            .header p {
-                font-size: 1rem;
-            }
-
-            .input-area {
-                flex-direction: column;
-            }
-
-            .input-area button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .chip {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#7c3aed',
+                        secondary: '#4f46e5',
+                        dark: '#0f172a',
+                        'dark-surface': '#1e293b',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
             }
         }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-gradient-to-br from-dark to-dark-surface min-h-screen text-gray-100 font-sans">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-magic"></i>
-                IMAGE-GEN
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#communitySection">
-                            <i class="fas fa-images"></i> Community
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#generateSection">
-                            <i class="fas fa-magic"></i> Generate
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#historySection">
-                            <i class="fas fa-history"></i> History
-                        </a>
-                    </li>
-                </ul>
-                <div class="auth-buttons">
-                    <span id="userInfo" class="text-light" style="display: none;"></span>
-                    <button id="loginBtn" class="btn btn-outline-light">
-                        <i class="fas fa-sign-in-alt"></i> Login
+    <nav class="fixed top-0 left-0 right-0 bg-dark/95 backdrop-blur-lg border-b border-gray-800 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center space-x-2 text-xl font-bold text-white">
+                        <i class="fas fa-magic text-primary"></i>
+                        <span>IMAGE-GEN</span>
+                    </a>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#communitySection" class="nav-link text-gray-300 hover:text-white transition-colors">
+                        <i class="fas fa-images mr-2"></i>Community
+                    </a>
+                    <a href="#generateSection" class="nav-link text-gray-300 hover:text-white transition-colors">
+                        <i class="fas fa-magic mr-2"></i>Generate
+                    </a>
+                    <a href="#historySection" class="nav-link text-gray-300 hover:text-white transition-colors">
+                        <i class="fas fa-history mr-2"></i>History
+                    </a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <span id="userInfo" class="text-gray-300 hidden"></span>
+                    <button id="loginBtn" class="px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
                     </button>
-                    <button id="registerBtn" class="btn btn-outline-light">
-                        <i class="fas fa-user-plus"></i> Register
+                    <button id="registerBtn" class="px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i>Register
                     </button>
-                    <button id="logoutBtn" class="btn btn-outline-light" style="display: none;">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                    <button id="logoutBtn" class="px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors hidden">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+
+                <button class="md:hidden p-2 rounded-lg hover:bg-gray-800" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 bg-dark/95 backdrop-blur-lg z-40 hidden">
+        <div class="flex flex-col h-full">
+            <div class="flex justify-end p-4">
+                <button id="closeMobileMenu" class="p-2 rounded-lg hover:bg-gray-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex flex-col items-center space-y-6 p-4">
+                <a href="#communitySection" class="text-xl text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-images mr-2"></i>Community
+                </a>
+                <a href="#generateSection" class="text-xl text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-magic mr-2"></i>Generate
+                </a>
+                <a href="#historySection" class="text-xl text-gray-300 hover:text-white transition-colors">
+                    <i class="fas fa-history mr-2"></i>History
+                </a>
+                <div class="flex flex-col space-y-4 w-full max-w-xs">
+                    <button id="mobileLoginBtn" class="w-full px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </button>
+                    <button id="mobileRegisterBtn" class="w-full px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-user-plus mr-2"></i>Register
+                    </button>
+                    <button id="mobileLogoutBtn" class="w-full px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors hidden">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
                     </button>
                 </div>
             </div>
         </div>
-    </nav>
-    <div class="menu-overlay"></div>
+    </div>
 
     <!-- Main Content -->
-    <div class="container main-container">
-        <!-- Community Section (Now Home) -->
+    <main class="pt-16">
+        <!-- Community Section -->
         <section id="communitySection" class="section active">
-            <div class="section-header">
-                <h2>Community Gallery</h2>
-                <p>Explore amazing creations from our community</p>
-                <button id="generateNowBtn" class="btn btn-primary btn-lg mt-3">
-                    <i class="fas fa-magic"></i> Generate Your Own
-                </button>
+            <div class="bg-dark-surface/50 border-b border-gray-800 py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            Community Gallery
+                        </h2>
+                        <p class="mt-4 text-gray-400">Explore amazing creations from our community</p>
+                        <div class="mt-6">
+                            <select id="sortOrder" class="bg-dark border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-primary">
+                                <option value="old-new">Oldest First</option>
+                                <option value="new-old">Newest First</option>
+                            </select>
+                        </div>
+                        <button id="generateNowBtn" class="mt-6 px-6 py-3 bg-gradient-to-r from-primary to-secondary rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            <i class="fas fa-magic mr-2"></i>Generate Your Own
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="row g-4" id="galleryContainer">
-                <!-- Community images will be loaded here -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="galleryContainer">
+                    <!-- Community images will be loaded here -->
+                </div>
             </div>
         </section>
 
         <!-- Generate Section -->
-        <section id="generateSection" class="section">
-            <div class="section-header">
-                <h2>Create Your Image</h2>
-                <p>Transform your ideas into stunning visuals using AI</p>
+        <section id="generateSection" class="section hidden">
+            <div class="bg-dark-surface/50 border-b border-gray-800 py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            Create Your Image
+                        </h2>
+                        <p class="mt-4 text-gray-400">Transform your ideas into stunning visuals using AI</p>
+                    </div>
+                </div>
             </div>
-            <div class="main-card">
-                <div class="input-area">
-                    <div class="input-wrapper">
-                        <input type="text" id="promptInput" class="form-control" placeholder="Describe the image you want to generate...">
-                        <button id="generateBtn" class="btn btn-primary">
-                            <i class="fas fa-magic"></i> Generate
-                        </button>
-                    </div>
-                </div>
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="bg-dark-surface/50 rounded-2xl p-6 border border-gray-800">
+                    <div class="flex flex-col space-y-6">
+                        <div class="flex gap-4">
+                            <input type="text" id="promptInput" 
+                                class="flex-1 bg-dark border border-gray-700 rounded-lg px-4 py-3 text-gray-300 placeholder-gray-500 focus:outline-none focus:border-primary"
+                                placeholder="Describe the image you want to generate...">
+                            <button id="generateBtn" 
+                                class="px-6 py-3 bg-gradient-to-r from-primary to-secondary rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                                <i class="fas fa-magic mr-2"></i>Generate
+                            </button>
+                        </div>
 
-                <div id="loadingIndicator" class="loading" style="display: none;">
-                    <div class="spinner-border text-light" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <span class="loading-text">Creating your masterpiece...</span>
-                </div>
+                        <div id="loadingIndicator" class="hidden flex items-center justify-center space-x-4 py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <span class="text-gray-400">Creating your masterpiece...</span>
+                        </div>
 
-                <div class="result-container">
-                    <img id="generatedImage" style="display: none;" alt="Generated image">
-                </div>
+                        <div id="result" class="hidden">
+                            <img id="generatedImage" class="w-full rounded-lg shadow-lg" alt="Generated image">
+                        </div>
 
-                <div class="suggestion-chips">
-                    <div class="chip" data-prompt="A beautiful landscape with mountains and a lake">
-                        <i class="fas fa-mountain"></i>
-                        Beautiful Landscape
-                    </div>
-                    <div class="chip" data-prompt="A futuristic city with flying cars and neon lights">
-                        <i class="fas fa-city"></i>
-                        Futuristic City
-                    </div>
-                    <div class="chip" data-prompt="An abstract concept of artificial intelligence">
-                        <i class="fas fa-brain"></i>
-                        Abstract AI
-                    </div>
-                    <div class="chip" data-prompt="A fantasy creature in a magical forest">
-                        <i class="fas fa-dragon"></i>
-                        Fantasy Creature
+                        <div class="flex flex-wrap gap-3 justify-center">
+                            <button class="chip px-4 py-2 bg-dark border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors" 
+                                data-prompt="A beautiful landscape with mountains and a lake">
+                                <i class="fas fa-mountain mr-2"></i>Beautiful Landscape
+                            </button>
+                            <button class="chip px-4 py-2 bg-dark border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors"
+                                data-prompt="A futuristic city with flying cars and neon lights">
+                                <i class="fas fa-city mr-2"></i>Futuristic City
+                            </button>
+                            <button class="chip px-4 py-2 bg-dark border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors"
+                                data-prompt="An abstract concept of artificial intelligence">
+                                <i class="fas fa-brain mr-2"></i>Abstract AI
+                            </button>
+                            <button class="chip px-4 py-2 bg-dark border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors"
+                                data-prompt="A fantasy creature in a magical forest">
+                                <i class="fas fa-dragon mr-2"></i>Fantasy Creature
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- History Section -->
-        <section id="historySection" class="section">
-            <div class="section-header">
-                <h2>Your Generations</h2>
-                <p>View your previously generated images</p>
+        <section id="historySection" class="section hidden">
+            <div class="bg-dark-surface/50 border-b border-gray-800 py-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            Your Generations
+                        </h2>
+                        <p class="mt-4 text-gray-400">View your previously generated images</p>
+                    </div>
+                </div>
             </div>
-            <div class="row g-4" id="historyContainer">
-                <!-- User's generated images will be loaded here -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="historyContainer">
+                    <!-- User's generated images will be loaded here -->
+                </div>
             </div>
         </section>
-    </div>
+    </main>
 
     <!-- Login Modal -->
-    <div class="modal fade" id="loginModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Login
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div id="loginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-dark-surface rounded-2xl border border-gray-800 w-full max-w-md">
+                <div class="p-6 border-b border-gray-800">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-semibold text-white">
+                            <i class="fas fa-sign-in-alt mr-2 text-primary"></i>Login
+                        </h3>
+                        <button class="text-gray-400 hover:text-white" onclick="closeModal('loginModal')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form id="loginForm">
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" id="loginEmail" class="form-control" required>
+                <div class="p-6">
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                            <input type="email" id="loginEmail" required
+                                class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-primary">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" id="loginPassword" class="form-control" required>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Password</label>
+                            <input type="password" id="loginPassword" required
+                                class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-primary">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <button type="submit" 
+                            class="w-full px-4 py-2 bg-gradient-to-r from-primary to-secondary rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Login
+                        </button>
                     </form>
                 </div>
             </div>
@@ -364,31 +246,40 @@
     </div>
 
     <!-- Register Modal -->
-    <div class="modal fade" id="registerModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-user-plus"></i>
-                        Register
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div id="registerModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-dark-surface rounded-2xl border border-gray-800 w-full max-w-md">
+                <div class="p-6 border-b border-gray-800">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-semibold text-white">
+                            <i class="fas fa-user-plus mr-2 text-primary"></i>Register
+                        </h3>
+                        <button class="text-gray-400 hover:text-white" onclick="closeModal('registerModal')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <form id="registerForm">
-                        <div class="mb-3">
-                            <label class="form-label">Username</label>
-                            <input type="text" id="registerUsername" class="form-control" required>
+                <div class="p-6">
+                    <form id="registerForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Username</label>
+                            <input type="text" id="registerUsername" required
+                                class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-primary">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" id="registerEmail" class="form-control" required>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Email</label>
+                            <input type="email" id="registerEmail" required
+                                class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-primary">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" id="registerPassword" class="form-control" required>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Password</label>
+                            <input type="password" id="registerPassword" required
+                                class="w-full bg-dark border border-gray-700 rounded-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-primary">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                        <button type="submit" 
+                            class="w-full px-4 py-2 bg-gradient-to-r from-primary to-secondary rounded-lg font-semibold hover:opacity-90 transition-opacity">
+                            Register
+                        </button>
                     </form>
                 </div>
             </div>
@@ -396,22 +287,26 @@
     </div>
 
     <!-- Image Preview Modal -->
-    <div class="modal fade" id="imagePreviewModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Image Preview</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div id="imagePreviewModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+        <div class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-dark-surface rounded-2xl border border-gray-800 w-full max-w-4xl">
+                <div class="p-6 border-b border-gray-800">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xl font-semibold text-white">Image Preview</h3>
+                        <button class="text-gray-400 hover:text-white" onclick="closeModal('imagePreviewModal')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-body text-center">
-                    <img id="previewImage" src="" alt="Preview" class="img-fluid">
-                    <p id="previewPrompt" class="mt-3"></p>
+                <div class="p-6">
+                    <img id="previewImage" class="w-full rounded-lg" alt="Preview">
+                    <p id="previewPrompt" class="mt-4 text-gray-300 text-center"></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
+

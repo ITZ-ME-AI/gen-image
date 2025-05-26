@@ -184,13 +184,17 @@ body {
 
 /* Main Container */
 .main-container {
-    padding: 2rem 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Sections */
 .section {
     display: none;
     animation: fadeIn 0.5s ease;
+    width: 100%;
+    padding: 0;
 }
 
 .section.active {
@@ -199,9 +203,11 @@ body {
 
 .section-header {
     text-align: center;
-    margin-bottom: 3rem;
-    padding: 2rem 0;
+    margin-bottom: 2rem;
+
     position: relative;
+    background: rgba(40, 42, 54, 0.7);
+    border-bottom: 1px solid var(--border);
 }
 
 .section-header h2 {
@@ -389,7 +395,16 @@ body {
     color: var(--primary-light);
 }
 
-/* Community Cards */
+/* Community Gallery Improvements */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 0.5rem;
+    width: 100%;
+    margin: 0;
+}
+
 .community-image-card {
     background: rgba(40, 42, 54, 0.7);
     border: 1px solid var(--border);
@@ -400,7 +415,7 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
-    margin-bottom: 1.5rem;
+    margin: 0;
 }
 
 .community-image-card:hover {
@@ -410,28 +425,24 @@ body {
 
 .community-image-card img {
     width: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 1/1;
     object-fit: cover;
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
-.community-image-card:hover img {
-    transform: scale(1.02);
-}
-
 .community-image-card .card-body {
-    padding: 1rem;
+    padding: 1.25rem;
     background: rgba(40, 42, 54, 0.95);
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
 }
 
 .community-image-card .prompt {
     font-weight: 500;
     color: var(--text);
-    margin-bottom: 0.75rem;
     font-size: 1rem;
     flex-grow: 1;
     display: -webkit-box;
@@ -444,7 +455,6 @@ body {
 .community-image-card .username {
     font-weight: 600;
     color: var(--primary-light);
-    margin-bottom: 0.25rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -454,6 +464,37 @@ body {
 .community-image-card .timestamp {
     font-size: 0.8rem;
     color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Sorting Controls */
+.sorting-controls {
+    margin: 1.5rem auto;
+    max-width: 200px;
+}
+
+.sorting-controls .form-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sorting-controls .form-select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25);
+}
+
+.sorting-controls .form-select option {
+    background: var(--surface);
+    color: var(--text);
 }
 
 /* Buttons */
@@ -561,11 +602,11 @@ body {
     .hero-section {
         padding: 2rem 0;
     }
-
+    
     .hero-section h1 {
         font-size: 2.5rem;
     }
-
+    
     .main-card {
         padding: 1.5rem;
         margin: 1rem;
@@ -579,17 +620,17 @@ body {
     .input-wrapper .btn {
         width: 100%;
     }
-
+    
     .suggestion-chips {
         gap: 0.75rem;
         padding: 0 1rem;
     }
-
+    
     .chip {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
     }
-
+    
     #generatedImage {
         max-width: 100%;
     }
@@ -607,8 +648,10 @@ body {
         font-size: 1rem;
     }
 
-    .community-image-card {
-        margin-bottom: 1rem;
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 0.5rem;
     }
 }
 
@@ -628,6 +671,10 @@ body {
     .main-card {
         padding: 1rem;
         margin: 0.5rem;
+    }
+
+    .gallery-grid {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -738,36 +785,67 @@ body {
     margin-right: 0.5rem;
 }
 
-/* Community Gallery Improvements */
-#galleryContainer {
-    margin-top: 2rem;
-}
-
-/* Update grid layout for 4 cards per row */
-#galleryContainer .col-md-4 {
-    width: 25%;
-    padding: 0 0.75rem;
-}
-
-/* Responsive Improvements */
+/* Responsive Gallery */
 @media (max-width: 1200px) {
-    #galleryContainer .col-md-4 {
-        width: 33.333%;
+    .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
 @media (max-width: 992px) {
-    #galleryContainer .col-md-4 {
-        width: 50%;
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 576px) {
-    #galleryContainer .col-md-4 {
-        width: 100%;
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* History Section */
+#historyContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 0.5rem;
+    width: 100%;
+    margin: 0;
+}
+
+@media (max-width: 1200px) {
+    .gallery-grid,
+    #historyContainer {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .gallery-grid,
+    #historyContainer {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .gallery-grid,
+    #historyContainer {
+        grid-template-columns: 1fr;
     }
     
-    .community-image-card {
-        margin-bottom: 1rem;
+    .section-header {
+        padding: 1rem 0.5rem;
     }
+}
+
+/* Update container padding */
+.container {
+    max-width: 100%;
+    padding: 0;
+}
+
+/* Update navbar container */
+.navbar .container {
+    padding: 0 1rem;
 } 

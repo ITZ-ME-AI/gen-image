@@ -13,10 +13,41 @@ const loginBtn = document.getElementById('loginBtn');
 const registerBtn = document.getElementById('registerBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const userInfo = document.getElementById('userInfo');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+const closeMobileMenu = document.getElementById('closeMobileMenu');
+const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
+const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
 // State
 let currentUser = null;
 let isGenerating = false;
+
+// Mobile Menu
+mobileMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.remove('hidden');
+});
+
+closeMobileMenu.addEventListener('click', () => {
+    mobileMenu.classList.add('hidden');
+});
+
+// Close mobile menu when clicking a link
+document.querySelectorAll('#mobileMenu a').forEach(link => {
+    link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+    });
+});
+
+// Modal Functions
+function showModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+}
 
 // Check authentication status
 async function checkAuth() {
@@ -52,16 +83,26 @@ async function checkAuth() {
 // Update UI based on auth status
 function updateAuthUI(isAuthenticated) {
     if (isAuthenticated) {
-        loginBtn.style.display = 'none';
-        registerBtn.style.display = 'none';
-        logoutBtn.style.display = 'block';
-        userInfo.style.display = 'block';
+        loginBtn.classList.add('hidden');
+        registerBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+        userInfo.classList.remove('hidden');
         userInfo.textContent = `Welcome, ${currentUser.username}`;
+        
+        // Update mobile menu
+        mobileLoginBtn.classList.add('hidden');
+        mobileRegisterBtn.classList.add('hidden');
+        mobileLogoutBtn.classList.remove('hidden');
     } else {
-        loginBtn.style.display = 'block';
-        registerBtn.style.display = 'block';
-        logoutBtn.style.display = 'none';
-        userInfo.style.display = 'none';
+        loginBtn.classList.remove('hidden');
+        registerBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+        userInfo.classList.add('hidden');
+        
+        // Update mobile menu
+        mobileLoginBtn.classList.remove('hidden');
+        mobileRegisterBtn.classList.remove('hidden');
+        mobileLogoutBtn.classList.add('hidden');
     }
 }
 
@@ -69,20 +110,22 @@ function updateAuthUI(isAuthenticated) {
 function showSection(sectionId) {
     // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
+        section.classList.add('hidden');
     });
     
     // Show selected section
     const selectedSection = document.getElementById(sectionId);
     if (selectedSection) {
-        selectedSection.classList.add('active');
+        selectedSection.classList.remove('hidden');
     }
     
     // Update navigation links
     navLinks.forEach(link => {
-        link.classList.remove('active');
+        link.classList.remove('text-white');
+        link.classList.add('text-gray-300');
         if (link.getAttribute('href') === `#${sectionId}`) {
-            link.classList.add('active');
+            link.classList.remove('text-gray-300');
+            link.classList.add('text-white');
         }
     });
 
@@ -92,26 +135,16 @@ function showSection(sectionId) {
     } else if (sectionId === 'generateSection') {
         if (!currentUser) {
             alert('Please login to generate images');
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-            loginModal.show();
+            showModal('loginModal');
             return;
         }
     } else if (sectionId === 'historySection') {
         if (!currentUser) {
             alert('Please login to view your history');
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-            loginModal.show();
+            showModal('loginModal');
             return;
         }
         loadUserHistory();
-    }
-
-    // Close mobile menu if open
-    const navbarCollapse = document.querySelector('.navbar-collapse');
-    const menuOverlay = document.querySelector('.menu-overlay');
-    if (navbarCollapse.classList.contains('show')) {
-        navbarCollapse.classList.remove('show');
-        menuOverlay.classList.remove('show');
     }
 }
 
@@ -123,15 +156,14 @@ async function generateImage(prompt) {
         const token = localStorage.getItem('token');
         if (!token) {
             alert('Please login to generate images');
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-            loginModal.show();
+            showModal('loginModal');
             return;
         }
 
         isGenerating = true;
         generateBtn.disabled = true;
-        loadingIndicator.style.display = 'flex';
-        generatedImage.style.display = 'none';
+        loadingIndicator.classList.remove('hidden');
+        document.getElementById('result').classList.add('hidden');
         
         // Start backend generation process
         const response = await fetch('/api/generate', {
@@ -165,15 +197,15 @@ async function generateImage(prompt) {
                         const data = JSON.parse(line.slice(6));
                         
                         if (data.type === 'estimation') {
-                            loadingIndicator.querySelector('.loading-text').textContent = 
+                            loadingIndicator.querySelector('span').textContent = 
                                 `In queue: ${data.queueSize} people ahead, ETA: ${data.eta.toFixed(1)} seconds`;
                         } else if (data.type === 'processing') {
-                            loadingIndicator.querySelector('.loading-text').textContent = 'Processing image...';
+                            loadingIndicator.querySelector('span').textContent = 'Processing image...';
                         } else if (data.type === 'success' && data.originalUrl) {
                             // Show original URL immediately for preview in generate page
                             generatedImage.src = data.originalUrl;
-                            generatedImage.style.display = 'block';
-                            loadingIndicator.querySelector('.loading-text').textContent = 'Uploading image...';
+                            document.getElementById('result').classList.remove('hidden');
+                            loadingIndicator.querySelector('span').textContent = 'Uploading image...';
                             
                             // Upload to File2Link in the background
                             const uploadedUrl = await uploadImageToFile2Link(data.originalUrl);
@@ -209,8 +241,8 @@ async function generateImage(prompt) {
     } finally {
         isGenerating = false;
         generateBtn.disabled = false;
-        loadingIndicator.style.display = 'none';
-        loadingIndicator.querySelector('.loading-text').textContent = 'Creating your masterpiece...';
+        loadingIndicator.classList.add('hidden');
+        loadingIndicator.querySelector('span').textContent = 'Creating your masterpiece...';
     }
 }
 
@@ -279,9 +311,17 @@ async function loadCommunityImages() {
         
         const galleryContainer = document.getElementById('galleryContainer');
         if (galleryContainer) {
+            // Sort images based on current sort order
+            const sortOrder = document.getElementById('sortOrder').value;
+            const sortedImages = [...images].sort((a, b) => {
+                const dateA = new Date(a.created_at);
+                const dateB = new Date(b.created_at);
+                return sortOrder === 'old-new' ? dateA - dateB : dateB - dateA;
+            });
+            
             galleryContainer.innerHTML = '';
             
-            images.forEach(image => {
+            sortedImages.forEach(image => {
                 const card = createImageCard(image);
                 galleryContainer.appendChild(card);
             });
@@ -291,51 +331,51 @@ async function loadCommunityImages() {
     }
 }
 
+// Add event listener for sort order change
+document.getElementById('sortOrder').addEventListener('change', loadCommunityImages);
+
 // Create Image Card
 function createImageCard(image) {
     const card = document.createElement('div');
-    card.className = 'col-md-4 mb-4';
+    card.className = 'bg-dark-surface/50 rounded-xl overflow-hidden border border-gray-800 hover:border-primary/50 transition-colors';
     card.innerHTML = `
-        <div class="community-image-card">
-            <img src="${image.uploaded_url || image.image_url}" alt="${image.prompt}" class="card-img-top" 
+        <div class="aspect-square overflow-hidden">
+            <img src="${image.uploaded_url || image.image_url}" alt="${image.prompt}" 
+                 class="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                  data-uploaded-url="${image.uploaded_url || image.image_url}"
                  data-original-url="${image.original_url || image.image_url}"
                  data-prompt="${image.prompt}">
-            <div class="card-body">
-                <p class="prompt">${image.prompt}</p>
-                <p class="username">
-                    <i class="fas fa-user"></i>
-                    ${image.username}
+        </div>
+        <div class="p-4 space-y-2">
+            <p class="text-gray-300 line-clamp-2">${image.prompt}</p>
+            <div class="flex items-center justify-between text-sm">
+                <p class="text-primary flex items-center">
+                    <i class="fas fa-user mr-2"></i>${image.username}
                 </p>
-                <p class="timestamp">
-                    <i class="fas fa-clock"></i>
-                    ${new Date(image.created_at).toLocaleDateString()}
+                <p class="text-gray-500 flex items-center">
+                    <i class="fas fa-clock mr-2"></i>${new Date(image.created_at).toLocaleDateString()}
                 </p>
-                ${currentUser && currentUser.id === image.user_id ? `
-                    <button class="btn btn-danger btn-sm mt-2" onclick="deleteImage(${image.id})">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                ` : ''}
             </div>
+            ${currentUser && currentUser.id === image.user_id ? `
+                <button onclick="deleteImage(${image.id})" 
+                    class="w-full mt-2 px-4 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Delete
+                </button>
+            ` : ''}
         </div>
     `;
 
     // Add click handler for image preview
     const img = card.querySelector('img');
     img.addEventListener('click', () => {
-        const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
         const previewImage = document.getElementById('previewImage');
         const previewPrompt = document.getElementById('previewPrompt');
         
-        // Use uploaded URL for community page preview
-        const uploadedUrl = img.getAttribute('data-uploaded-url');
-        previewImage.src = uploadedUrl;
+        previewImage.src = img.getAttribute('data-uploaded-url');
         previewPrompt.textContent = img.getAttribute('data-prompt');
         
-        // Show modal
-        previewModal.show();
+        showModal('imagePreviewModal');
         
-        // Add loading state
         previewImage.style.opacity = '0';
         previewImage.onload = () => {
             previewImage.style.opacity = '1';
@@ -367,6 +407,15 @@ async function loadUserHistory() {
         if (historyContainer) {
             historyContainer.innerHTML = '';
             
+            if (images.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-gray-400">No images generated yet. Start creating!</p>
+                    </div>
+                `;
+                return;
+            }
+            
             images.forEach(image => {
                 const card = createImageCard(image);
                 historyContainer.appendChild(card);
@@ -374,6 +423,14 @@ async function loadUserHistory() {
         }
     } catch (error) {
         console.error('Failed to load user history:', error);
+        const historyContainer = document.getElementById('historyContainer');
+        if (historyContainer) {
+            historyContainer.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-red-400">Failed to load history. Please try again later.</p>
+                </div>
+            `;
+        }
     }
 }
 
@@ -426,6 +483,15 @@ navLinks.forEach(link => {
     });
 });
 
+// Mobile menu links
+document.querySelectorAll('#mobileMenu a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sectionId = link.getAttribute('href').substring(1);
+        showSection(sectionId);
+    });
+});
+
 if (generateBtn) {
     generateBtn.addEventListener('click', () => {
         const prompt = promptInput.value.trim();
@@ -460,36 +526,31 @@ suggestionChips.forEach(chip => {
     });
 });
 
-if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
-        const loginModalElement = document.getElementById('loginModal');
-        if (loginModalElement) {
-            const loginModal = new bootstrap.Modal(loginModalElement);
-            loginModal.show();
-        }
-    });
-}
+// Auth Button Event Listeners
+[loginBtn, mobileLoginBtn].forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', () => showModal('loginModal'));
+    }
+});
 
-if (registerBtn) {
-    registerBtn.addEventListener('click', () => {
-        const registerModalElement = document.getElementById('registerModal');
-        if (registerModalElement) {
-            const registerModal = new bootstrap.Modal(registerModalElement);
-            registerModal.show();
-        }
-    });
-}
+[registerBtn, mobileRegisterBtn].forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', () => showModal('registerModal'));
+    }
+});
 
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('token');
-        currentUser = null;
-        updateAuthUI(false);
-        showSection('communitySection');
-        const historyContainer = document.getElementById('historyContainer');
-        if(historyContainer) historyContainer.innerHTML = '';
-    });
-}
+[logoutBtn, mobileLogoutBtn].forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            currentUser = null;
+            updateAuthUI(false);
+            showSection('communitySection');
+            const historyContainer = document.getElementById('historyContainer');
+            if(historyContainer) historyContainer.innerHTML = '';
+        });
+    }
+});
 
 // Form Submissions
 const loginForm = document.getElementById('loginForm');
@@ -500,16 +561,16 @@ if (loginForm) {
         const emailInput = document.getElementById('loginEmail');
         const passwordInput = document.getElementById('loginPassword');
         
-        const email = emailInput ? emailInput.value : '';
-        const password = passwordInput ? passwordInput.value : '';
-        
         try {
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    password: passwordInput.value
+                })
             });
             
             if (response.ok) {
@@ -517,16 +578,9 @@ if (loginForm) {
                 localStorage.setItem('token', data.token);
                 currentUser = data.user;
                 updateAuthUI(true);
-                
-                const loginModalElement = document.getElementById('loginModal');
-                if (loginModalElement) {
-                    const modal = bootstrap.Modal.getInstance(loginModalElement);
-                    if (modal) modal.hide();
-                }
-                
-                if(emailInput) emailInput.value = '';
-                if(passwordInput) passwordInput.value = '';
-
+                closeModal('loginModal');
+                emailInput.value = '';
+                passwordInput.value = '';
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Login failed');
@@ -546,10 +600,6 @@ if (registerForm) {
         const usernameInput = document.getElementById('registerUsername');
         const emailInput = document.getElementById('registerEmail');
         const passwordInput = document.getElementById('registerPassword');
-
-        const username = usernameInput ? usernameInput.value : '';
-        const email = emailInput ? emailInput.value : '';
-        const password = passwordInput ? passwordInput.value : '';
         
         try {
             const response = await fetch('/api/register', {
@@ -557,7 +607,11 @@ if (registerForm) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({
+                    username: usernameInput.value,
+                    email: emailInput.value,
+                    password: passwordInput.value
+                })
             });
             
             if (response.ok) {
@@ -565,17 +619,10 @@ if (registerForm) {
                 localStorage.setItem('token', data.token);
                 currentUser = data.user;
                 updateAuthUI(true);
-                
-                const registerModalElement = document.getElementById('registerModal');
-                if (registerModalElement) {
-                    const modal = bootstrap.Modal.getInstance(registerModalElement);
-                    if (modal) modal.hide();
-                }
-                
-                if(usernameInput) usernameInput.value = '';
-                if(emailInput) emailInput.value = '';
-                if(passwordInput) passwordInput.value = '';
-
+                closeModal('registerModal');
+                usernameInput.value = '';
+                emailInput.value = '';
+                passwordInput.value = '';
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Registration failed');
@@ -587,27 +634,12 @@ if (registerForm) {
     });
 }
 
-// Add event listener for menu overlay
-document.querySelector('.menu-overlay').addEventListener('click', () => {
-    const navbarCollapse = document.querySelector('.navbar-collapse');
-    const menuOverlay = document.querySelector('.menu-overlay');
-    navbarCollapse.classList.remove('show');
-    menuOverlay.classList.remove('show');
-});
-
-// Update navbar toggler to handle overlay
-document.querySelector('.navbar-toggler').addEventListener('click', () => {
-    const menuOverlay = document.querySelector('.menu-overlay');
-    menuOverlay.classList.toggle('show');
-});
-
 // Generate Now button click handler
 if (generateNowBtn) {
     generateNowBtn.addEventListener('click', () => {
         if (!currentUser) {
             alert('Please login to generate images');
-            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-            loginModal.show();
+            showModal('loginModal');
             return;
         }
         showSection('generateSection');
