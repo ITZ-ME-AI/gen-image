@@ -88,8 +88,22 @@ function showSection(sectionId) {
     // Load section-specific content
     if (sectionId === 'communitySection') {
         loadCommunityImages();
-    } else if (sectionId === 'historySection' && currentUser) {
+    } else if (sectionId === 'historySection') {
+        if (!currentUser) {
+            alert('Please login to view your history');
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+            return;
+        }
         loadUserHistory();
+    }
+
+    // Close mobile menu if open
+    const navbarCollapse = document.querySelector('.navbar-collapse');
+    const menuOverlay = document.querySelector('.menu-overlay');
+    if (navbarCollapse.classList.contains('show')) {
+        navbarCollapse.classList.remove('show');
+        menuOverlay.classList.remove('show');
     }
 }
 
@@ -98,16 +112,19 @@ async function generateImage(prompt) {
     if (isGenerating) return;
     
     try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('Please login to generate images');
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+            return;
+        }
+
         isGenerating = true;
         generateBtn.disabled = true;
         loadingIndicator.style.display = 'flex';
         generatedImage.style.display = 'none';
         
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('Please login to generate images');
-        }
-
         // Start backend generation process
         const response = await fetch('/api/generate', {
             method: 'POST',
@@ -156,8 +173,7 @@ async function generateImage(prompt) {
                             // Add image to community gallery via new backend endpoint
                             if (uploadedUrl) {
                                 await addCommunityImage(data.originalUrl, uploadedUrl, prompt);
-                                // Update with processed URL
-                                generatedImage.src = uploadedUrl;
+                                // Keep showing the original URL for better performance
                                 loadCommunityImages();
                                 loadUserHistory();
                             } else {
@@ -273,7 +289,9 @@ function createImageCard(image) {
     card.className = 'col-md-4 mb-4';
     card.innerHTML = `
         <div class="community-image-card">
-            <img src="${image.uploaded_url || image.image_url}" alt="${image.prompt}" class="card-img-top">
+            <img src="${image.uploaded_url || image.image_url}" alt="${image.prompt}" class="card-img-top" 
+                 data-original-url="${image.original_url || image.image_url}"
+                 data-prompt="${image.prompt}">
             <div class="card-body">
                 <p class="prompt">${image.prompt}</p>
                 <p class="username">
@@ -292,6 +310,19 @@ function createImageCard(image) {
             </div>
         </div>
     `;
+
+    // Add click handler for image preview
+    const img = card.querySelector('img');
+    img.addEventListener('click', () => {
+        const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        const previewImage = document.getElementById('previewImage');
+        const previewPrompt = document.getElementById('previewPrompt');
+        
+        previewImage.src = img.getAttribute('data-original-url');
+        previewPrompt.textContent = img.getAttribute('data-prompt');
+        previewModal.show();
+    });
+
     return card;
 }
 
@@ -532,4 +563,18 @@ if (registerForm) {
             alert('Registration failed: ' + error.message);
         }
     });
-} 
+}
+
+// Add event listener for menu overlay
+document.querySelector('.menu-overlay').addEventListener('click', () => {
+    const navbarCollapse = document.querySelector('.navbar-collapse');
+    const menuOverlay = document.querySelector('.menu-overlay');
+    navbarCollapse.classList.remove('show');
+    menuOverlay.classList.remove('show');
+});
+
+// Update navbar toggler to handle overlay
+document.querySelector('.navbar-toggler').addEventListener('click', () => {
+    const menuOverlay = document.querySelector('.menu-overlay');
+    menuOverlay.classList.toggle('show');
+}); 
