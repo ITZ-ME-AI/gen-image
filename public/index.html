@@ -227,13 +227,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#homeSection">
-                            <i class="fas fa-home"></i> Home
+                        <a class="nav-link active" href="#communitySection">
+                            <i class="fas fa-images"></i> Community
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#communitySection">
-                            <i class="fas fa-images"></i> Community
+                        <a class="nav-link" href="#generateSection">
+                            <i class="fas fa-magic"></i> Generate
                         </a>
                     </li>
                     <li class="nav-item">
@@ -261,13 +261,26 @@
 
     <!-- Main Content -->
     <div class="container main-container">
-        <!-- Home Section -->
-        <section id="homeSection" class="section active">
-            <div class="hero-section text-center">
-                <h1>Create Amazing Images with AI</h1>
-                <p class="subtitle">Transform your ideas into stunning visuals using the power of artificial intelligence</p>
+        <!-- Community Section (Now Home) -->
+        <section id="communitySection" class="section active">
+            <div class="section-header">
+                <h2>Community Gallery</h2>
+                <p>Explore amazing creations from our community</p>
+                <button id="generateNowBtn" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-magic"></i> Generate Your Own
+                </button>
             </div>
-            
+            <div class="row g-4" id="galleryContainer">
+                <!-- Community images will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Generate Section -->
+        <section id="generateSection" class="section">
+            <div class="section-header">
+                <h2>Create Your Image</h2>
+                <p>Transform your ideas into stunning visuals using AI</p>
+            </div>
             <div class="main-card">
                 <div class="input-area">
                     <div class="input-wrapper">
@@ -307,17 +320,6 @@
                         Fantasy Creature
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Community Section -->
-        <section id="communitySection" class="section">
-            <div class="section-header">
-                <h2>Community Gallery</h2>
-                <p>Explore amazing creations from our community</p>
-            </div>
-            <div class="row g-4" id="galleryContainer">
-                <!-- Community images will be loaded here -->
             </div>
         </section>
 

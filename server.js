@@ -246,10 +246,28 @@ app.delete('/api/user-generations/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Soft delete the generation
+    // First, get the image details to find the corresponding community image
+    const generationResult = await pool.query(
+      'SELECT original_url, uploaded_url FROM user_generations WHERE id = $1 AND user_id = $2',
+      [id, userId]
+    );
+
+    if (generationResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    const { original_url, uploaded_url } = generationResult.rows[0];
+
+    // Soft delete from user_generations
     await pool.query(
       'UPDATE user_generations SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2',
       [id, userId]
+    );
+
+    // Remove from community images (images table)
+    await pool.query(
+      'DELETE FROM images WHERE user_id = $1 AND (original_url = $2 OR uploaded_url = $3)',
+      [userId, original_url, uploaded_url]
     );
 
     res.json({ success: true });

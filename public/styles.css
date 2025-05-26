@@ -200,6 +200,8 @@ body {
 .section-header {
     text-align: center;
     margin-bottom: 3rem;
+    padding: 2rem 0;
+    position: relative;
 }
 
 .section-header h2 {
@@ -215,6 +217,8 @@ body {
 .section-header p {
     color: var(--text-secondary);
     font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 /* Hero Section */
@@ -389,57 +393,66 @@ body {
 .community-image-card {
     background: rgba(40, 42, 54, 0.7);
     border: 1px solid var(--border);
-    border-radius: 1.5rem;
+    border-radius: 1rem;
     overflow: hidden;
     transition: all 0.3s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
+    position: relative;
+    margin-bottom: 1.5rem;
 }
 
 .community-image-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .community-image-card img {
     width: 100%;
-    aspect-ratio: 1/1;
+    aspect-ratio: 16/9;
     object-fit: cover;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .community-image-card:hover img {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .community-image-card .card-body {
-    padding: 1.5rem;
-    background: linear-gradient(to top, rgba(40, 42, 54, 0.95), rgba(40, 42, 54, 0.8));
+    padding: 1rem;
+    background: rgba(40, 42, 54, 0.95);
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
 .community-image-card .prompt {
-    font-style: italic;
+    font-weight: 500;
     color: var(--text);
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
     flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
 }
 
 .community-image-card .username {
     font-weight: 600;
     color: var(--primary-light);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .community-image-card .timestamp {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
 }
 
@@ -581,8 +594,21 @@ body {
         max-width: 100%;
     }
 
+    .section-header {
+        padding: 1rem 0;
+    }
+
     .section-header h2 {
         font-size: 2rem;
+    }
+
+    #generateNowBtn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .community-image-card {
+        margin-bottom: 1rem;
     }
 }
 
@@ -607,9 +633,9 @@ body {
 
 /* Image Preview Modal */
 #imagePreviewModal .modal-content {
-    background: rgba(40, 42, 54, 0.95);
+    background: rgba(40, 42, 54, 0.98);
     border: 1px solid var(--border);
-    border-radius: 1.5rem;
+    border-radius: 1rem;
 }
 
 #imagePreviewModal .modal-header {
@@ -619,6 +645,7 @@ body {
 
 #imagePreviewModal .modal-body {
     padding: 1.5rem;
+    text-align: center;
 }
 
 #imagePreviewModal .modal-title {
@@ -628,16 +655,18 @@ body {
 
 #imagePreviewModal #previewImage {
     max-width: 100%;
-    max-height: 70vh;
-    border-radius: 1rem;
+    max-height: 80vh;
+    border-radius: 0.5rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 #imagePreviewModal #previewPrompt {
-    color: var(--text-secondary);
-    font-style: italic;
+    color: var(--text);
+    font-style: normal;
     margin-top: 1rem;
     font-size: 1.1rem;
+    font-weight: 500;
+    padding: 0 1rem;
 }
 
 /* Make images clickable */
@@ -684,5 +713,61 @@ body {
 
     .menu-overlay {
         display: none !important;
+    }
+}
+
+/* Generate Now Button */
+#generateNowBtn {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(124, 58, 237, 0.4);
+    margin-top: 2rem;
+}
+
+#generateNowBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.6);
+}
+
+#generateNowBtn i {
+    margin-right: 0.5rem;
+}
+
+/* Community Gallery Improvements */
+#galleryContainer {
+    margin-top: 2rem;
+}
+
+/* Update grid layout for 4 cards per row */
+#galleryContainer .col-md-4 {
+    width: 25%;
+    padding: 0 0.75rem;
+}
+
+/* Responsive Improvements */
+@media (max-width: 1200px) {
+    #galleryContainer .col-md-4 {
+        width: 33.333%;
+    }
+}
+
+@media (max-width: 992px) {
+    #galleryContainer .col-md-4 {
+        width: 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    #galleryContainer .col-md-4 {
+        width: 100%;
+    }
+    
+    .community-image-card {
+        margin-bottom: 1rem;
     }
 } 

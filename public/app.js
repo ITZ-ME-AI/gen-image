@@ -1,10 +1,11 @@
 // DOM Elements
-const homeSection = document.getElementById('homeSection');
 const communitySection = document.getElementById('communitySection');
+const generateSection = document.getElementById('generateSection');
 const historySection = document.getElementById('historySection');
 const navLinks = document.querySelectorAll('.nav-link');
 const promptInput = document.getElementById('promptInput');
 const generateBtn = document.getElementById('generateBtn');
+const generateNowBtn = document.getElementById('generateNowBtn');
 const generatedImage = document.getElementById('generatedImage');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const suggestionChips = document.querySelectorAll('.chip');
@@ -88,6 +89,13 @@ function showSection(sectionId) {
     // Load section-specific content
     if (sectionId === 'communitySection') {
         loadCommunityImages();
+    } else if (sectionId === 'generateSection') {
+        if (!currentUser) {
+            alert('Please login to generate images');
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+            return;
+        }
     } else if (sectionId === 'historySection') {
         if (!currentUser) {
             alert('Please login to view your history');
@@ -162,7 +170,7 @@ async function generateImage(prompt) {
                         } else if (data.type === 'processing') {
                             loadingIndicator.querySelector('.loading-text').textContent = 'Processing image...';
                         } else if (data.type === 'success' && data.originalUrl) {
-                            // Show original URL immediately for preview
+                            // Show original URL immediately for preview in generate page
                             generatedImage.src = data.originalUrl;
                             generatedImage.style.display = 'block';
                             loadingIndicator.querySelector('.loading-text').textContent = 'Uploading image...';
@@ -290,6 +298,7 @@ function createImageCard(image) {
     card.innerHTML = `
         <div class="community-image-card">
             <img src="${image.uploaded_url || image.image_url}" alt="${image.prompt}" class="card-img-top" 
+                 data-uploaded-url="${image.uploaded_url || image.image_url}"
                  data-original-url="${image.original_url || image.image_url}"
                  data-prompt="${image.prompt}">
             <div class="card-body">
@@ -318,9 +327,19 @@ function createImageCard(image) {
         const previewImage = document.getElementById('previewImage');
         const previewPrompt = document.getElementById('previewPrompt');
         
-        previewImage.src = img.getAttribute('data-original-url');
+        // Use uploaded URL for community page preview
+        const uploadedUrl = img.getAttribute('data-uploaded-url');
+        previewImage.src = uploadedUrl;
         previewPrompt.textContent = img.getAttribute('data-prompt');
+        
+        // Show modal
         previewModal.show();
+        
+        // Add loading state
+        previewImage.style.opacity = '0';
+        previewImage.onload = () => {
+            previewImage.style.opacity = '1';
+        };
     });
 
     return card;
@@ -360,7 +379,7 @@ async function loadUserHistory() {
 
 // Delete Image
 async function deleteImage(imageId) {
-    if (!confirm('Are you sure you want to delete this image?')) return;
+    if (!confirm('Are you sure you want to delete this image? This will remove it from both your history and the community gallery.')) return;
     
     try {
         const token = localStorage.getItem('token');
@@ -377,8 +396,11 @@ async function deleteImage(imageId) {
         });
         
         if (response.ok) {
-            loadCommunityImages();
-            loadUserHistory();
+            // Refresh both community and history views
+            await Promise.all([
+                loadCommunityImages(),
+                loadUserHistory()
+            ]);
         } else {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Failed to delete image');
@@ -392,7 +414,7 @@ async function deleteImage(imageId) {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth().then(() => {
-        showSection('homeSection');
+        showSection('communitySection');
     });
 });
 
@@ -463,7 +485,7 @@ if (logoutBtn) {
         localStorage.removeItem('token');
         currentUser = null;
         updateAuthUI(false);
-        showSection('homeSection');
+        showSection('communitySection');
         const historyContainer = document.getElementById('historyContainer');
         if(historyContainer) historyContainer.innerHTML = '';
     });
@@ -577,4 +599,17 @@ document.querySelector('.menu-overlay').addEventListener('click', () => {
 document.querySelector('.navbar-toggler').addEventListener('click', () => {
     const menuOverlay = document.querySelector('.menu-overlay');
     menuOverlay.classList.toggle('show');
-}); 
+});
+
+// Generate Now button click handler
+if (generateNowBtn) {
+    generateNowBtn.addEventListener('click', () => {
+        if (!currentUser) {
+            alert('Please login to generate images');
+            const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+            loginModal.show();
+            return;
+        }
+        showSection('generateSection');
+    });
+} 
